@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบประเมินความพึงพอใจการเรียน - โรงเรียนกระทุ่มแบนวิเศษสมุทรคุณ</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
@@ -22,6 +25,7 @@
 </head>
 <body class="text-slate-800">
 
+    <!-- Header Navigation -->
     <header class="bg-gradient-to-r from-sky-700 via-sky-600 to-indigo-700 text-white shadow-lg sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
@@ -44,23 +48,26 @@
         </div>
     </header>
 
+    <!-- Main Container -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
+        <!-- Navigation Tabs -->
         <div class="flex border-b border-slate-200 mb-8 bg-white rounded-t-xl px-4 pt-2 shadow-sm">
-            <button onclick="switchTab('survey')" id="tab-survey" class="tab-btn active px-6 py-3 font-medium text-slate-600 hover:text-sky-600 flex items-center gap-2 transition-all">
+            <button type="button" onclick="switchTab('survey')" id="tab-survey" class="tab-btn active px-6 py-3 font-medium text-slate-600 hover:text-sky-600 flex items-center gap-2 transition-all">
                 <i data-lucide="file-edit" class="w-5 h-5"></i>
                 แบบฟอร์มประเมิน
             </button>
-            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn px-6 py-3 font-medium text-slate-600 hover:text-sky-600 flex items-center gap-2 transition-all">
+            <button type="button" onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn px-6 py-3 font-medium text-slate-600 hover:text-sky-600 flex items-center gap-2 transition-all">
                 <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                 Dashboard สรุปผลสถิติ
             </button>
-            <button onclick="switchTab('cleaning')" id="tab-cleaning" class="tab-btn px-6 py-3 font-medium text-slate-600 hover:text-sky-600 flex items-center gap-2 transition-all">
+            <button type="button" onclick="switchTab('cleaning')" id="tab-cleaning" class="tab-btn px-6 py-3 font-medium text-slate-600 hover:text-sky-600 flex items-center gap-2 transition-all">
                 <i data-lucide="sparkles" class="w-5 h-5"></i>
                 การทำความสะอาดข้อมูล (Data Cleaning)
             </button>
         </div>
 
+        <!-- Section 1: Survey Form -->
         <section id="section-survey" class="space-y-6">
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 md:p-8">
                 <div class="border-b border-slate-100 pb-4 mb-6">
@@ -72,6 +79,7 @@
                 </div>
 
                 <form id="evalForm" onsubmit="handleFormSubmit(event)" class="space-y-6">
+                    <!-- Student Info -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-sky-50/50 p-4 rounded-xl border border-sky-100">
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">รหัสนักเรียน / ชื่อ-สกุล <span class="text-red-500">*</span></label>
@@ -105,6 +113,7 @@
                         </div>
                     </div>
 
+                    <!-- Evaluation Scale Grid -->
                     <div class="space-y-4">
                         <h3 class="font-bold text-slate-800 text-lg">ส่วนที่ 2: เกณฑ์ประเมินความพึงพอใจ (คะแนน 1 - 5)</h3>
                         <div class="overflow-x-auto">
@@ -165,11 +174,13 @@
                         </div>
                     </div>
 
+                    <!-- Feedback Comment -->
                     <div>
                         <label class="block text-sm font-semibold text-slate-700 mb-1">ข้อเสนอแนะเพิ่มเติมเพื่อการปรับปรุง</label>
                         <textarea id="feedbackText" rows="3" placeholder="ข้อเสนอแนะเพิ่มเติม..." class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition"></textarea>
                     </div>
 
+                    <!-- Submit Button -->
                     <div class="flex justify-end gap-3">
                         <button type="reset" class="px-5 py-2.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 font-medium transition">ล้างข้อมูล</button>
                         <button type="submit" id="submitBtn" class="px-6 py-2.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-medium shadow-md flex items-center gap-2 transition">
@@ -181,7 +192,9 @@
             </div>
         </section>
 
+        <!-- Section 2: Dashboard -->
         <section id="section-dashboard" class="space-y-6 hidden">
+            <!-- Filter & Controls Bar -->
             <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center gap-3">
                     <i data-lucide="filter" class="text-sky-600 w-5 h-5"></i>
@@ -204,6 +217,7 @@
                 </div>
             </div>
 
+            <!-- Metric KPI Cards -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
                 <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
                     <div>
@@ -250,7 +264,9 @@
                 </div>
             </div>
 
+            <!-- Visual Charts Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Chart 1: Subject Scores -->
                 <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                     <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <i data-lucide="bar-chart-3" class="text-sky-600 w-5 h-5"></i>
@@ -261,6 +277,7 @@
                     </div>
                 </div>
 
+                <!-- Chart 2: Question Aspect Breakdown -->
                 <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                     <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <i data-lucide="pie-chart" class="text-indigo-600 w-5 h-5"></i>
@@ -272,6 +289,7 @@
                 </div>
             </div>
 
+            <!-- Likert Interpretation Reference Table -->
             <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                 <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
                     <i data-lucide="book-open" class="text-slate-600 w-5 h-5"></i>
@@ -302,6 +320,7 @@
             </div>
         </section>
 
+        <!-- Section 3: Data Cleaning Log -->
         <section id="section-cleaning" class="space-y-6 hidden">
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                 <div class="flex flex-wrap items-center justify-between border-b border-slate-100 pb-4 mb-4 gap-4">
@@ -312,12 +331,13 @@
                         </h2>
                         <p class="text-slate-500 text-sm mt-1">ประมวลผลลบข้อมูลขยะ ข้อมูลซ้ำ และตรวจสอบความถูกต้องก่อนคำนวณสถิติ</p>
                     </div>
-                    <button onclick="fetchRealtimeData()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm transition">
+                    <button type="button" onclick="fetchRealtimeData()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm transition">
                         <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                         ดึงข้อมูลใหม่ & Clean ข้อมูล
                     </button>
                 </div>
 
+                <!-- Data Pipeline Audit Summary -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl">
                         <span class="text-xs text-slate-500 block">ข้อมูลดิบจาก Sheets (Raw Data)</span>
@@ -333,6 +353,7 @@
                     </div>
                 </div>
 
+                <!-- Cleaned Data Table -->
                 <h3 class="font-bold text-slate-800 mb-3 text-sm">ตารางแสดงรายการข้อมูลที่ผ่านการทำความสะอาดแล้ว</h3>
                 <div class="overflow-x-auto border border-slate-200 rounded-xl">
                     <table class="w-full text-left text-sm">
@@ -347,7 +368,8 @@
                             </tr>
                         </thead>
                         <tbody id="cleanedTableBody" class="divide-y divide-slate-200 bg-white">
-                            </tbody>
+                            <!-- JS Inject -->
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -355,20 +377,28 @@
 
     </main>
 
+    <!-- App Script Core logic -->
     <script>
-        // Web App URL ล่าสุดจาก Google Apps Script ของคุณ
         const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvMdtCZfQvpaSkO3M30GfIsHJoV12fxilVm9IQZSpaKoYYH0gnvcX4sYiJq1DyFI_P/exec";
 
-        // Global State
         let rawSurveyData = [];
         let cleanedSurveyData = [];
         let chartInstanceMean = null;
         let chartInstanceAspect = null;
 
-        // Init Lucide Icons
         lucide.createIcons();
 
-        // 1. Submit Form Handler -> Post to Google Sheets
+        function switchTab(tabName) {
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            const targetSection = document.getElementById(`section-${tabName}`);
+            const targetTab = document.getElementById(`tab-${tabName}`);
+
+            if (targetSection) targetSection.classList.remove('hidden');
+            if (targetTab) targetTab.classList.add('active');
+        }
+
         async function handleFormSubmit(e) {
             e.preventDefault();
             
@@ -399,8 +429,6 @@
 
                 alert("บันทึกแบบประเมินลง Google Sheets เรียบร้อยแล้ว!");
                 document.getElementById('evalForm').reset();
-                
-                // Fetch new data & update Dashboard immediately
                 await fetchRealtimeData();
                 switchTab('dashboard');
             } catch (error) {
@@ -412,7 +440,6 @@
             }
         }
 
-        // 2. Fetch Realtime Data from Google Sheets
         async function fetchRealtimeData() {
             try {
                 const res = await fetch(GOOGLE_APPS_SCRIPT_URL);
@@ -427,7 +454,6 @@
             }
         }
 
-        // 3. Data Cleaning Engine
         function runDataCleaning() {
             const seen = new Set();
             let duplicatesCount = 0;
@@ -462,7 +488,6 @@
                 };
             });
 
-            // Update UI Counters
             document.getElementById('cleanRawCount').innerText = rawSurveyData.length;
             document.getElementById('cleanRemovedCount').innerText = duplicatesCount;
             document.getElementById('cleanFinalCount').innerText = cleanedSurveyData.length;
@@ -471,7 +496,6 @@
             updateDashboard();
         }
 
-        // 4. Render Cleaned Table
         function renderCleanedTable() {
             const tbody = document.getElementById('cleanedTableBody');
             tbody.innerHTML = "";
@@ -491,7 +515,6 @@
             });
         }
 
-        // 5. Update Dashboard Stats & Charts
         function updateDashboard() {
             const filterSubject = document.getElementById('filterSubject').value;
             let filteredData = cleanedSurveyData;
@@ -510,22 +533,18 @@
                 return;
             }
 
-            // Total Count
             document.getElementById('statTotal').innerText = filteredData.length;
 
-            // Overall Mean
             const overallScores = filteredData.map(d => d.meanScore);
             const meanSum = overallScores.reduce((a, b) => a + b, 0);
             const overallMean = meanSum / filteredData.length;
             document.getElementById('statMean').innerText = overallMean.toFixed(2);
             document.getElementById('statMeanInterpretation').innerText = getLikertLabel(overallMean);
 
-            // Standard Deviation (S.D.)
             const variance = overallScores.reduce((acc, score) => acc + Math.pow(score - overallMean, 2), 0) / filteredData.length;
             const sd = Math.sqrt(variance);
             document.getElementById('statSD').innerText = sd.toFixed(2);
 
-            // Subject Mean Aggregation
             const subjectGroup = {};
             cleanedSurveyData.forEach(d => {
                 if (!subjectGroup[d.subjectName]) subjectGroup[d.subjectName] = [];
@@ -547,7 +566,6 @@
 
             document.getElementById('statTopSubject').innerText = topSub;
 
-            // Aspects Aggregation (Q1 - Q5)
             const aspectAvg = [1, 2, 3, 4, 5].map(qNum => {
                 const key = `q${qNum}`;
                 const qSum = filteredData.reduce((acc, d) => acc + d[key], 0);
@@ -557,7 +575,6 @@
             renderCharts(subjectMeans, aspectAvg);
         }
 
-        // Helper: Likert Label
         function getLikertLabel(score) {
             if (score >= 4.21) return "ระดับ: มากที่สุด";
             if (score >= 3.41) return "ระดับ: มาก";
@@ -566,9 +583,7 @@
             return "ระดับ: น้อยที่สุด";
         }
 
-        // Helper: Render Chart.js
         function renderCharts(subjectMeans, aspectAvg) {
-            // Bar Chart
             const ctx1 = document.getElementById('chartSubjectMean').getContext('2d');
             if (chartInstanceMean) chartInstanceMean.destroy();
 
@@ -592,7 +607,6 @@
                 }
             });
 
-            // Radar Chart
             const ctx2 = document.getElementById('chartAspectRadar').getContext('2d');
             if (chartInstanceAspect) chartInstanceAspect.destroy();
 
@@ -616,27 +630,13 @@
             });
         }
 
-        // Tab Switcher
-        function switchTab(tabName) {
-            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-
-            document.getElementById(`section-${tabName}`).classList.remove('hidden');
-            document.getElementById(`tab-${tabName}`).classList.add('active');
-        }
-
-        // Escape HTML Utility
         function escapeHtml(str) {
             return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
-        // Start Realtime Polling Loop (ทุกๆ 5 วินาที)
         window.onload = function() {
             fetchRealtimeData();
-            
-            setInterval(() => {
-                fetchRealtimeData();
-            }, 5000);
+            setInterval(fetchRealtimeData, 5000);
         };
     </script>
 </body>
