@@ -356,7 +356,7 @@
     </main>
 
     <script>
-        // Web App URL จาก Google Apps Script ของคุณ
+        // Web App URL ล่าสุดจาก Google Apps Script ของคุณ
         const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvMdtCZfQvpaSkO3M30GfIsHJoV12fxilVm9IQZSpaKoYYH0gnvcX4sYiJq1DyFI_P/exec";
 
         // Global State
@@ -433,7 +433,6 @@
             let duplicatesCount = 0;
             
             cleanedSurveyData = rawSurveyData.filter(item => {
-                // Deduplicate by studentName + studentGrade + subjectName
                 const name = (item.studentName || '').toString().toLowerCase().trim();
                 const key = `${name}_${item.studentGrade}_${item.subjectName}`;
                 
@@ -628,14 +627,13 @@
 
         // Escape HTML Utility
         function escapeHtml(str) {
-            return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace/>/g, '&gt;').replace(/"/g, '&quot;');
+            return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
         // Start Realtime Polling Loop (ทุกๆ 5 วินาที)
         window.onload = function() {
             fetchRealtimeData();
             
-            // Auto fetch new data every 5 seconds
             setInterval(() => {
                 fetchRealtimeData();
             }, 5000);
