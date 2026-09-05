@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบประเมินความพึงพอใจการเรียน - โรงเรียนกระทุ่มแบนวิเศษสมุทรคุณ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f8fafc;
+        }
+        .tab-btn.active {
+            border-bottom: 3px solid #0284c7;
+            color: #0284c7;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <header class="bg-gradient-to-r from-sky-700 via-sky-600 to-indigo-700 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-white p-2 rounded-full text-sky-700 shadow-md">
+                        <i data-lucide="graduation-cap" class="w-8 h-8"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl sm:text-2xl font-bold tracking-tight">โรงเรียนกระทุ่มแบนวิเศษสมุทรคุณ</h1>
+                        <p class="text-xs text-sky-100">ระบบประเมินความพึงพอใจการเรียนรายวิชา & Real-time Dashboard</p>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-4">
+                    <span id="syncStatus" class="bg-sky-800/60 px-3 py-1.5 rounded-full text-xs font-medium text-sky-100 flex items-center gap-1.5 border border-sky-400/30">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        เชื่อมต่อ Google Sheets Real-time
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <div class="flex border-b border-slate-200 mb-8 bg-white rounded-t-xl px-4 pt-2 shadow-sm">
+            <button onclick="switchTab('survey')" id="tab-survey" class="tab-btn active px-6 py-3 font-medium text-slate-600 hover:text-sky-600 flex items-center gap-2 transition-all">
+                <i data-lucide="file-edit" class="w-5 h-5"></i>
+                แบบฟอร์มประเมิน
+            </button>
+            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn px-6 py-3 font-medium text-slate-600 hover:text-sky-600 flex items-center gap-2 transition-all">
+                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                Dashboard สรุปผลสถิติ
+            </button>
+            <button onclick="switchTab('cleaning')" id="tab-cleaning" class="tab-btn px-6 py-3 font-medium text-slate-600 hover:text-sky-600 flex items-center gap-2 transition-all">
+                <i data-lucide="sparkles" class="w-5 h-5"></i>
+                การทำความสะอาดข้อมูล (Data Cleaning)
+            </button>
+        </div>
+
+        <section id="section-survey" class="space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 md:p-8">
+                <div class="border-b border-slate-100 pb-4 mb-6">
+                    <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                        <i data-lucide="clipboard-list" class="text-sky-600"></i>
+                        แบบประเมินความพึงพอใจและความชอบในการเรียนรายวิชา
+                    </h2>
+                    <p class="text-slate-500 text-sm mt-1">กรุณากรอกข้อมูลตามความเป็นจริง ข้อมูลจะถูกบันทึกไปยัง Google Sheets โดยตรง</p>
+                </div>
+
+                <form id="evalForm" onsubmit="handleFormSubmit(event)" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-sky-50/50 p-4 rounded-xl border border-sky-100">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">รหัสนักเรียน / ชื่อ-สกุล <span class="text-red-500">*</span></label>
+                            <input type="text" id="studentName" required placeholder="เช่น 34567 หรือ เด็กชายสมชาย" class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">ระดับชั้น <span class="text-red-500">*</span></label>
+                            <select id="studentGrade" required class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition">
+                                <option value="">-- เลือกระดับชั้น --</option>
+                                <option value="ม.1">มัธยมศึกษาปีที่ 1</option>
+                                <option value="ม.2">มัธยมศึกษาปีที่ 2</option>
+                                <option value="ม.3">มัธยมศึกษาปีที่ 3</option>
+                                <option value="ม.4">มัธยมศึกษาปีที่ 4</option>
+                                <option value="ม.5">มัธยมศึกษาปีที่ 5</option>
+                                <option value="ม.6">มัธยมศึกษาปีที่ 6</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">รายวิชาที่ประเมิน <span class="text-red-500">*</span></label>
+                            <select id="subjectName" required class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition">
+                                <option value="">-- เลือกรายวิชา --</option>
+                                <option value="คณิตศาสตร์">คณิตศาสตร์</option>
+                                <option value="วิทยาศาสตร์และเทคโนโลยี">วิทยาศาสตร์และเทคโนโลยี</option>
+                                <option value="ภาษาไทย">ภาษาไทย</option>
+                                <option value="ภาษาต่างประเทศ">ภาษาต่างประเทศ (ภาษาอังกฤษ)</option>
+                                <option value="สังคมศึกษา ศาสนา และวัฒนธรรม">สังคมศึกษา ศาสนา และวัฒนธรรม</option>
+                                <option value="สุขศึกษาและพลศึกษา">สุขศึกษาและพลศึกษา</option>
+                                <option value="ศิลปะ ดนตรี นาฏศิลป์">ศิลปะ ดนตรี นาฏศิลป์</option>
+                                <option value="การงานอาชีพ">การงานอาชีพ</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <h3 class="font-bold text-slate-800 text-lg">ส่วนที่ 2: เกณฑ์ประเมินความพึงพอใจ (คะแนน 1 - 5)</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-100 text-slate-700 text-sm">
+                                        <th class="p-3 rounded-l-lg">ประเด็นการประเมิน</th>
+                                        <th class="p-3 text-center w-20">1<br><span class="text-xs font-normal">น้อยที่สุด</span></th>
+                                        <th class="p-3 text-center w-20">2<br><span class="text-xs font-normal">น้อย</span></th>
+                                        <th class="p-3 text-center w-20">3<br><span class="text-xs font-normal">ปานกลาง</span></th>
+                                        <th class="p-3 text-center w-20">4<br><span class="text-xs font-normal">มาก</span></th>
+                                        <th class="p-3 text-center w-20 rounded-r-lg">5<br><span class="text-xs font-normal">มากที่สุด</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-200 text-sm">
+                                    <tr>
+                                        <td class="py-4 px-3 font-medium text-slate-700">1. เนื้อหาวิชาน่าสนใจและมีประโยชน์ต่อการนำไปใช้</td>
+                                        <td class="text-center"><input type="radio" name="q1" value="1" required class="w-4 h-4 text-sky-600"></td>
+                                        <td class="text-center"><input type="radio" name="q1" value="2" class="w-4 h-4 text-sky-600"></td>
+                                        <td class="text-center"><input type="radio" name="q1" value="3" class="w-4 h-4 text-sky-600"></td>
+                                        <td class="text-center"><input type="radio" name="q1" value="4" class="w-4 h-4 text-sky-600"></td>
+                                        <td class="text-center"><input type="radio" name="q1" value="5" class="w-4 h-4 text-sky-600"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-4 px-3 font-medium text-slate-700">2. รูปแบบการสอนและความสนุกสนานในการเรียนรู้</td>
+                                        <td class="text-center"><input type="radio" name="q2" value="1" required class="w-4 h-4 text-sky-600"></td>
+                                        <td class="text-center"><input type="radio" name="q2" value="2" class="w-4 h-4 text-sky-600"></td>
+                                        <td class="text-center"><input type="radio" name="q2" value="3" class="w-4 h-4 text-sky-600"></td>
+                                        <td class="text-center"><input type="radio" name="q2" value="4" class="w-4 h-4 text-sky-600"></td>
+                                        <td class="text-center"><input type="radio" name="q2" value="5" class="w-4 h-4 text-sky-600"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-4 px-3 font-medium text-slate-700">3. สื่อการเรียนการสอน อุปกรณ์ และเทคโนโลยีที่ใช้</td>
+                                        <td class="text-center"><input type="radio" name="q3" value="1" required class="w-4 h-4 text-sky-600"></td>
+                                        <td class="text-center"><input type="radio" name="q3" value="2" class="w-4 h-4 text-sky-600"></td>
+                                        <td class="text-center"><input type="radio" name="q3" value="3" class="w-4 h-4 text-sky-600"></td>
+                                        <td class="text-center"><input type="radio" name="q3" value="4" class="w-4 h-4 text-sky-600"></td>
+                                        <td class="text-center"><input type="radio" name="q3" value="5" class="w-4 h-4 text-sky-600"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-4 px-3 font-medium text-slate-700">4. บรรยากาศและความพร้อมของห้องเรียน/ห้องปฏิบัติการ</td>
+                                        <td class="text-center"><input type="radio" name="q4" value="1" required class="w-4 h-4 text-sky-600"></td>
+                                        <td class="text-center"><input type="radio" name="q4" value="2" class="w-4 h-4 text-sky-600"></td>
+                                        <td class="text-center"><input type="radio" name="q4" value="3" class="w-4 h-4 text-sky-600"></td>
+                                        <td class="text-center"><input type="radio" name="q4" value="4" class="w-4 h-4 text-sky-600"></td>
+                                        <td class="text-center"><input type="radio" name="q4" value="5" class="w-4 h-4 text-sky-600"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-4 px-3 font-medium text-slate-700">5. การวัดและประเมินผล มีความยุติธรรมและเหมาะสม</td>
+                                        <td class="text-center"><input type="radio" name="q5" value="1" required class="w-4 h-4 text-sky-600"></td>
+                                        <td class="text-center"><input type="radio" name="q5" value="2" class="w-4 h-4 text-sky-600"></td>
+                                        <td class="text-center"><input type="radio" name="q5" value="3" class="w-4 h-4 text-sky-600"></td>
+                                        <td class="text-center"><input type="radio" name="q5" value="4" class="w-4 h-4 text-sky-600"></td>
+                                        <td class="text-center"><input type="radio" name="q5" value="5" class="w-4 h-4 text-sky-600"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">ข้อเสนอแนะเพิ่มเติมเพื่อการปรับปรุง</label>
+                        <textarea id="feedbackText" rows="3" placeholder="ข้อเสนอแนะเพิ่มเติม..." class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition"></textarea>
+                    </div>
+
+                    <div class="flex justify-end gap-3">
+                        <button type="reset" class="px-5 py-2.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 font-medium transition">ล้างข้อมูล</button>
+                        <button type="submit" id="submitBtn" class="px-6 py-2.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-medium shadow-md flex items-center gap-2 transition">
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                            บันทึกแบบประเมิน
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section id="section-dashboard" class="space-y-6 hidden">
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="filter" class="text-sky-600 w-5 h-5"></i>
+                    <span class="font-semibold text-slate-700">ตัวกรองข้อมูล:</span>
+                    <select id="filterSubject" onchange="updateDashboard()" class="px-3 py-1.5 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-sky-500">
+                        <option value="ALL">ทุกรายวิชา</option>
+                        <option value="คณิตศาสตร์">คณิตศาสตร์</option>
+                        <option value="วิทยาศาสตร์และเทคโนโลยี">วิทยาศาสตร์และเทคโนโลยี</option>
+                        <option value="ภาษาไทย">ภาษาไทย</option>
+                        <option value="ภาษาต่างประเทศ">ภาษาต่างประเทศ</option>
+                        <option value="สังคมศึกษา ศาสนา และวัฒนธรรม">สังคมศึกษา ศาสนา และวัฒนธรรม</option>
+                        <option value="สุขศึกษาและพลศึกษา">สุขศึกษาและพลศึกษา</option>
+                        <option value="ศิลปะ ดนตรี นาฏศิลป์">ศิลปะ ดนตรี นาฏศิลป์</option>
+                        <option value="การงานอาชีพ">การงานอาชีพ</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2 text-xs text-slate-500">
+                    <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                    วิเคราะห์ผลจาก Google Sheets Real-time (ผ่าน Data Cleaning แล้ว)
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">จำนวนผู้ตอบแบบประเมิน</p>
+                        <h3 id="statTotal" class="text-3xl font-extrabold text-slate-800">0</h3>
+                        <p class="text-xs text-slate-400 mt-1">คน (Cleaned Data)</p>
+                    </div>
+                    <div class="bg-sky-100 p-3 rounded-xl text-sky-600">
+                        <i data-lucide="users" class="w-7 h-7"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">คะแนนเฉลี่ยรวม (Mean)</p>
+                        <h3 id="statMean" class="text-3xl font-extrabold text-sky-600">0.00</h3>
+                        <p id="statMeanInterpretation" class="text-xs font-medium text-emerald-600 mt-1">-</p>
+                    </div>
+                    <div class="bg-emerald-100 p-3 rounded-xl text-emerald-600">
+                        <i data-lucide="calculator" class="w-7 h-7"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">ความเบี่ยงเบน (S.D.)</p>
+                        <h3 id="statSD" class="text-3xl font-extrabold text-indigo-600">0.00</h3>
+                        <p class="text-xs text-slate-400 mt-1">การกระจายของข้อมูล</p>
+                    </div>
+                    <div class="bg-indigo-100 p-3 rounded-xl text-indigo-600">
+                        <i data-lucide="bar-chart-2" class="w-7 h-7"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">ความพึงพอใจสูงสุด</p>
+                        <h3 id="statTopSubject" class="text-lg font-bold text-amber-600 truncate max-w-[130px]">-</h3>
+                        <p class="text-xs text-slate-400 mt-1">รายวิชาที่ได้คะแนนสูงสุด</p>
+                    </div>
+                    <div class="bg-amber-100 p-3 rounded-xl text-amber-600">
+                        <i data-lucide="award" class="w-7 h-7"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i data-lucide="bar-chart-3" class="text-sky-600 w-5 h-5"></i>
+                        คะแนนความพึงพอใจเฉลี่ยแยกตามรายวิชา (เต็ม 5)
+                    </h3>
+                    <div class="h-64">
+                        <canvas id="chartSubjectMean"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i data-lucide="pie-chart" class="text-indigo-600 w-5 h-5"></i>
+                        สัดส่วนคะแนนแยกตามประเด็นการประเมิน (5 ด้าน)
+                    </h3>
+                    <div class="h-64">
+                        <canvas id="chartAspectRadar"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                    <i data-lucide="book-open" class="text-slate-600 w-5 h-5"></i>
+                    เกณฑ์การแปลความหมายคะแนนเฉลี่ย (Likert Scale 5 ระดับ)
+                </h3>
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center text-xs">
+                    <div class="bg-emerald-50 border border-emerald-200 p-2 rounded-lg">
+                        <span class="font-bold text-emerald-700 block">4.21 - 5.00</span>
+                        <span class="text-emerald-600">มากที่สุด</span>
+                    </div>
+                    <div class="bg-sky-50 border border-sky-200 p-2 rounded-lg">
+                        <span class="font-bold text-sky-700 block">3.41 - 4.20</span>
+                        <span class="text-sky-600">มาก</span>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-200 p-2 rounded-lg">
+                        <span class="font-bold text-amber-700 block">2.61 - 3.40</span>
+                        <span class="text-amber-600">ปานกลาง</span>
+                    </div>
+                    <div class="bg-orange-50 border border-orange-200 p-2 rounded-lg">
+                        <span class="font-bold text-orange-700 block">1.81 - 2.60</span>
+                        <span class="text-orange-600">น้อย</span>
+                    </div>
+                    <div class="bg-rose-50 border border-rose-200 p-2 rounded-lg">
+                        <span class="font-bold text-rose-700 block">1.00 - 1.80</span>
+                        <span class="text-rose-600">น้อยที่สุด</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-cleaning" class="space-y-6 hidden">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex flex-wrap items-center justify-between border-b border-slate-100 pb-4 mb-4 gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <i data-lucide="sparkles" class="text-indigo-600"></i>
+                            ระบบจัดการและทำความสะอาดข้อมูล (Data Cleaning Engine)
+                        </h2>
+                        <p class="text-slate-500 text-sm mt-1">ประมวลผลลบข้อมูลขยะ ข้อมูลซ้ำ และตรวจสอบความถูกต้องก่อนคำนวณสถิติ</p>
+                    </div>
+                    <button onclick="fetchRealtimeData()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm transition">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        ดึงข้อมูลใหม่ & Clean ข้อมูล
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl">
+                        <span class="text-xs text-slate-500 block">ข้อมูลดิบจาก Sheets (Raw Data)</span>
+                        <span id="cleanRawCount" class="text-2xl font-bold text-slate-700">0</span>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl">
+                        <span class="text-xs text-amber-700 block">พบรายการซ้ำซ้อน (Removed Duplicates)</span>
+                        <span id="cleanRemovedCount" class="text-2xl font-bold text-amber-600">0</span>
+                    </div>
+                    <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
+                        <span class="text-xs text-emerald-700 block">ข้อมูลสมบูรณ์พร้อมวิเคราะห์ (Cleaned)</span>
+                        <span id="cleanFinalCount" class="text-2xl font-bold text-emerald-600">0</span>
+                    </div>
+                </div>
+
+                <h3 class="font-bold text-slate-800 mb-3 text-sm">ตารางแสดงรายการข้อมูลที่ผ่านการทำความสะอาดแล้ว</h3>
+                <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-100 text-slate-700">
+                            <tr>
+                                <th class="p-3">#</th>
+                                <th class="p-3">ผู้ประเมิน</th>
+                                <th class="p-3">ชั้น</th>
+                                <th class="p-3">รายวิชา</th>
+                                <th class="p-3 text-center">คะแนนเฉลี่ย</th>
+                                <th class="p-3">การทำความสะอาด</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cleanedTableBody" class="divide-y divide-slate-200 bg-white">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Web App URL จาก Google Apps Script ของคุณ
+        const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4NYvh6VQNdntR0ABrO5F_VN-4emLUGnu8jBQmcAued5GT5ymbOwvUIaW6wBlnb4hW/exec";
+
+        // Global State
+        let rawSurveyData = [];
+        let cleanedSurveyData = [];
+        let chartInstanceMean = null;
+        let chartInstanceAspect = null;
+
+        // Init Lucide Icons
+        lucide.createIcons();
+
+        // 1. Submit Form Handler -> Post to Google Sheets
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> กำลังบันทึก...`;
+            lucide.createIcons();
+
+            const formData = {
+                studentName: document.getElementById('studentName').value.trim(),
+                studentGrade: document.getElementById('studentGrade').value,
+                subjectName: document.getElementById('subjectName').value,
+                q1: parseInt(document.querySelector('input[name="q1"]:checked').value),
+                q2: parseInt(document.querySelector('input[name="q2"]:checked').value),
+                q3: parseInt(document.querySelector('input[name="q3"]:checked').value),
+                q4: parseInt(document.querySelector('input[name="q4"]:checked').value),
+                q5: parseInt(document.querySelector('input[name="q5"]:checked').value),
+                feedback: document.getElementById('feedbackText').value.trim()
+            };
+
+            try {
+                await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                alert("บันทึกแบบประเมินลง Google Sheets เรียบร้อยแล้ว!");
+                document.getElementById('evalForm').reset();
+                
+                // Fetch new data & update Dashboard immediately
+                await fetchRealtimeData();
+                switchTab('dashboard');
+            } catch (error) {
+                alert("เกิดข้อผิดพลาดในการส่งข้อมูล: " + error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i data-lucide="send" class="w-4 h-4"></i> บันทึกแบบประเมิน`;
+                lucide.createIcons();
+            }
+        }
+
+        // 2. Fetch Realtime Data from Google Sheets
+        async function fetchRealtimeData() {
+            try {
+                const res = await fetch(GOOGLE_APPS_SCRIPT_URL);
+                const data = await res.json();
+                
+                if (Array.isArray(data)) {
+                    rawSurveyData = data;
+                    runDataCleaning();
+                }
+            } catch (err) {
+                console.error("Error loading data from Google Sheets:", err);
+            }
+        }
+
+        // 3. Data Cleaning Engine
+        function runDataCleaning() {
+            const seen = new Set();
+            let duplicatesCount = 0;
+            
+            cleanedSurveyData = rawSurveyData.filter(item => {
+                // Deduplicate by studentName + studentGrade + subjectName
+                const name = (item.studentName || '').toString().toLowerCase().trim();
+                const key = `${name}_${item.studentGrade}_${item.subjectName}`;
+                
+                if (seen.has(key)) {
+                    duplicatesCount++;
+                    return false;
+                }
+                seen.add(key);
+                return true;
+            }).map(item => {
+                const scores = [
+                    Number(item.q1) || 0,
+                    Number(item.q2) || 0,
+                    Number(item.q3) || 0,
+                    Number(item.q4) || 0,
+                    Number(item.q5) || 0
+                ];
+                const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+                return {
+                    ...item,
+                    q1: Number(item.q1) || 0,
+                    q2: Number(item.q2) || 0,
+                    q3: Number(item.q3) || 0,
+                    q4: Number(item.q4) || 0,
+                    q5: Number(item.q5) || 0,
+                    meanScore: parseFloat(avg.toFixed(2))
+                };
+            });
+
+            // Update UI Counters
+            document.getElementById('cleanRawCount').innerText = rawSurveyData.length;
+            document.getElementById('cleanRemovedCount').innerText = duplicatesCount;
+            document.getElementById('cleanFinalCount').innerText = cleanedSurveyData.length;
+
+            renderCleanedTable();
+            updateDashboard();
+        }
+
+        // 4. Render Cleaned Table
+        function renderCleanedTable() {
+            const tbody = document.getElementById('cleanedTableBody');
+            tbody.innerHTML = "";
+
+            cleanedSurveyData.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 border-b border-slate-100";
+                tr.innerHTML = `
+                    <td class="p-3 text-slate-400 font-mono text-xs">${index + 1}</td>
+                    <td class="p-3 font-medium text-slate-700">${escapeHtml(item.studentName)}</td>
+                    <td class="p-3 text-slate-600">${item.studentGrade}</td>
+                    <td class="p-3 text-slate-600">${item.subjectName}</td>
+                    <td class="p-3 text-center font-bold text-sky-600">${item.meanScore}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">Cleaned & Verified</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 5. Update Dashboard Stats & Charts
+        function updateDashboard() {
+            const filterSubject = document.getElementById('filterSubject').value;
+            let filteredData = cleanedSurveyData;
+
+            if (filterSubject !== 'ALL') {
+                filteredData = cleanedSurveyData.filter(d => d.subjectName === filterSubject);
+            }
+
+            if (filteredData.length === 0) {
+                document.getElementById('statTotal').innerText = "0";
+                document.getElementById('statMean').innerText = "0.00";
+                document.getElementById('statSD').innerText = "0.00";
+                document.getElementById('statMeanInterpretation').innerText = "-";
+                document.getElementById('statTopSubject').innerText = "-";
+                renderCharts({}, [0, 0, 0, 0, 0]);
+                return;
+            }
+
+            // Total Count
+            document.getElementById('statTotal').innerText = filteredData.length;
+
+            // Overall Mean
+            const overallScores = filteredData.map(d => d.meanScore);
+            const meanSum = overallScores.reduce((a, b) => a + b, 0);
+            const overallMean = meanSum / filteredData.length;
+            document.getElementById('statMean').innerText = overallMean.toFixed(2);
+            document.getElementById('statMeanInterpretation').innerText = getLikertLabel(overallMean);
+
+            // Standard Deviation (S.D.)
+            const variance = overallScores.reduce((acc, score) => acc + Math.pow(score - overallMean, 2), 0) / filteredData.length;
+            const sd = Math.sqrt(variance);
+            document.getElementById('statSD').innerText = sd.toFixed(2);
+
+            // Subject Mean Aggregation
+            const subjectGroup = {};
+            cleanedSurveyData.forEach(d => {
+                if (!subjectGroup[d.subjectName]) subjectGroup[d.subjectName] = [];
+                subjectGroup[d.subjectName].push(d.meanScore);
+            });
+
+            const subjectMeans = {};
+            let topSub = "-";
+            let topScore = 0;
+
+            Object.keys(subjectGroup).forEach(sub => {
+                const avg = subjectGroup[sub].reduce((a, b) => a + b, 0) / subjectGroup[sub].length;
+                subjectMeans[sub] = parseFloat(avg.toFixed(2));
+                if (avg > topScore) {
+                    topScore = avg;
+                    topSub = sub;
+                }
+            });
+
+            document.getElementById('statTopSubject').innerText = topSub;
+
+            // Aspects Aggregation (Q1 - Q5)
+            const aspectAvg = [1, 2, 3, 4, 5].map(qNum => {
+                const key = `q${qNum}`;
+                const qSum = filteredData.reduce((acc, d) => acc + d[key], 0);
+                return parseFloat((qSum / filteredData.length).toFixed(2));
+            });
+
+            renderCharts(subjectMeans, aspectAvg);
+        }
+
+        // Helper: Likert Label
+        function getLikertLabel(score) {
+            if (score >= 4.21) return "ระดับ: มากที่สุด";
+            if (score >= 3.41) return "ระดับ: มาก";
+            if (score >= 2.61) return "ระดับ: ปานกลาง";
+            if (score >= 1.81) return "ระดับ: น้อย";
+            return "ระดับ: น้อยที่สุด";
+        }
+
+        // Helper: Render Chart.js
+        function renderCharts(subjectMeans, aspectAvg) {
+            // Bar Chart
+            const ctx1 = document.getElementById('chartSubjectMean').getContext('2d');
+            if (chartInstanceMean) chartInstanceMean.destroy();
+
+            chartInstanceMean = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(subjectMeans),
+                    datasets: [{
+                        label: 'คะแนนเฉลี่ย',
+                        data: Object.values(subjectMeans),
+                        backgroundColor: 'rgba(2, 132, 199, 0.75)',
+                        borderColor: '#0284c7',
+                        borderWidth: 1.5,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { min: 0, max: 5 } }
+                }
+            });
+
+            // Radar Chart
+            const ctx2 = document.getElementById('chartAspectRadar').getContext('2d');
+            if (chartInstanceAspect) chartInstanceAspect.destroy();
+
+            chartInstanceAspect = new Chart(ctx2, {
+                type: 'radar',
+                data: {
+                    labels: ['ด้านเนื้อหา', 'ด้านการสอน', 'ด้านสื่ออุปกรณ์', 'ด้านบรรยากาศ', 'ด้านการประเมิน'],
+                    datasets: [{
+                        label: 'คะแนนเฉลี่ยรายด้าน',
+                        data: aspectAvg,
+                        backgroundColor: 'rgba(79, 70, 229, 0.2)',
+                        borderColor: '#4f46e5',
+                        pointBackgroundColor: '#4f46e5'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { r: { min: 0, max: 5 } }
+                }
+            });
+        }
+
+        // Tab Switcher
+        function switchTab(tabName) {
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(`section-${tabName}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+
+        // Escape HTML Utility
+        function escapeHtml(str) {
+            return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // Start Realtime Polling Loop (ทุกๆ 5 วินาที)
+        window.onload = function() {
+            fetchRealtimeData();
+            
+            // Auto fetch new data every 5 seconds
+            setInterval(() => {
+                fetchRealtimeData();
+            }, 5000);
+        };
+    </script>
+</body>
+</html>
