@@ -57,7 +57,7 @@
     <!-- Main Container -->
     <main class="max-w-[95%] mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-        <!-- Navigation Tabs (ปรับปรุง Grid & Spacing) -->
+        <!-- Navigation Tabs -->
         <div class="grid grid-cols-2 md:grid-cols-4 border-b border-slate-200 mb-8 bg-white rounded-t-xl overflow-hidden shadow-sm">
             <button type="button" onclick="switchTab('survey')" id="tab-survey" class="tab-btn active py-3.5 px-3 text-xs sm:text-sm font-medium text-slate-600 hover:text-sky-600 flex items-center justify-center gap-2 transition-all border-r border-slate-100">
                 <i data-lucide="file-edit" class="w-4 h-4 shrink-0"></i>
@@ -91,19 +91,26 @@
                 <form id="evalForm" onsubmit="handleFormSubmit(event)" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-sky-50/50 p-4 rounded-xl border border-sky-100">
                         <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-1">รหัสนักเรียน / ชื่อ-สกุล <span class="text-red-500">*</span></label>
-                            <input type="text" id="studentName" required placeholder="เช่น 34567 หรือ เด็กชายสมชาย" class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition">
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">รหัสประจำตัว / ชื่อ-สกุล <span class="text-red-500">*</span></label>
+                            <input type="text" id="studentName" required placeholder="เช่น 34567 หรือ นายสมชาย (ครู/นักเรียน)" class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-1">ระดับชั้น <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">ระดับชั้น / สถานะผู้ประเมิน <span class="text-red-500">*</span></label>
                             <select id="studentGrade" required class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition">
-                                <option value="">-- เลือกระดับชั้น --</option>
-                                <option value="ม.1">มัธยมศึกษาปีที่ 1</option>
-                                <option value="ม.2">มัธยมศึกษาปีที่ 2</option>
-                                <option value="ม.3">มัธยมศึกษาปีที่ 3</option>
-                                <option value="ม.4">มัธยมศึกษาปีที่ 4</option>
-                                <option value="ม.5">มัธยมศึกษาปีที่ 5</option>
-                                <option value="ม.6">มัธยมศึกษาปีที่ 6</option>
+                                <option value="">-- เลือกระดับชั้น/สถานะ --</option>
+                                <optgroup label="นักเรียน">
+                                    <option value="ม.1">มัธยมศึกษาปีที่ 1</option>
+                                    <option value="ม.2">มัธยมศึกษาปีที่ 2</option>
+                                    <option value="ม.3">มัธยมศึกษาปีที่ 3</option>
+                                    <option value="ม.4">มัธยมศึกษาปีที่ 4</option>
+                                    <option value="ม.5">มัธยมศึกษาปีที่ 5</option>
+                                    <option value="ม.6">มัธยมศึกษาปีที่ 6</option>
+                                </optgroup>
+                                <optgroup label="อาจารย์ / บุคลากร / อื่นๆ">
+                                    <option value="ครู / อาจารย์">ครู / อาจารย์ / ผู้สอน</option>
+                                    <option value="บุคลากรทางการศึกษา">บุคลากรทางการศึกษา / เจ้าหน้าที่</option>
+                                    <option value="ผู้ปกครอง / บุคคลภายนอก">ผู้ปกครอง / บุคคลภายนอก</option>
+                                </optgroup>
                             </select>
                         </div>
                         <div>
@@ -359,7 +366,7 @@
                             <tr>
                                 <th class="p-3">#</th>
                                 <th class="p-3">ผู้ประเมิน</th>
-                                <th class="p-3">ชั้น</th>
+                                <th class="p-3">ระดับชั้น/สถานะ</th>
                                 <th class="p-3">รายวิชา</th>
                                 <th class="p-3 text-center">คะแนนเฉลี่ย</th>
                                 <th class="p-3">การทำความสะอาด</th>
@@ -383,7 +390,6 @@
                     <p class="text-slate-500 text-sm mt-1">ใช้กล้องมือถือสแกนเพื่อเข้าใช้งานระบบประเมินความพึงพอใจ</p>
                 </div>
 
-                <!-- Canvas QR Container -->
                 <div class="bg-slate-50 border border-slate-200 p-6 rounded-2xl inline-block shadow-inner my-2">
                     <div id="qrcode-canvas" class="flex justify-center items-center min-h-[200px]"></div>
                     <p id="qrUrlText" class="text-xs font-mono text-slate-500 mt-4 break-all max-w-xs mx-auto"></p>
@@ -414,7 +420,6 @@
         let cleanedSurveyData = [];
         let chartInstanceMean = null;
         let chartInstanceAspect = null;
-        let qrObj = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
@@ -427,7 +432,7 @@
         function generateQR(url) {
             const container = document.getElementById("qrcode-canvas");
             container.innerHTML = ""; 
-            qrObj = new QRCode(container, {
+            new QRCode(container, {
                 text: url,
                 width: 200,
                 height: 200,
