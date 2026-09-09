@@ -52,7 +52,7 @@
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         <!-- Navigation Tabs -->
-        <div class="flex border-b border-slate-200 mb-8 bg-white rounded-t-xl px-4 pt-2 shadow-sm">
+        <div class="flex flex-wrap border-b border-slate-200 mb-8 bg-white rounded-t-xl px-4 pt-2 shadow-sm">
             <button type="button" onclick="switchTab('survey')" id="tab-survey" class="tab-btn active px-6 py-3 font-medium text-slate-600 hover:text-sky-600 flex items-center gap-2 transition-all">
                 <i data-lucide="file-edit" class="w-5 h-5"></i>
                 แบบฟอร์มประเมิน
@@ -64,6 +64,10 @@
             <button type="button" onclick="switchTab('cleaning')" id="tab-cleaning" class="tab-btn px-6 py-3 font-medium text-slate-600 hover:text-sky-600 flex items-center gap-2 transition-all">
                 <i data-lucide="sparkles" class="w-5 h-5"></i>
                 การทำความสะอาดข้อมูล (Data Cleaning)
+            </button>
+            <button type="button" onclick="switchTab('qrcode')" id="tab-qrcode" class="tab-btn px-6 py-3 font-medium text-slate-600 hover:text-sky-600 flex items-center gap-2 transition-all">
+                <i data-lucide="qr-code" class="w-5 h-5"></i>
+                QR Code เข้าเว็บไซต์
             </button>
         </div>
 
@@ -375,6 +379,44 @@
             </div>
         </section>
 
+        <!-- Section 4: QR Code Page (เพิ่มใหม่) -->
+        <section id="section-qrcode" class="space-y-6 hidden">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-8 text-center max-w-2xl mx-auto">
+                <div class="mb-6">
+                    <div class="inline-flex p-3 bg-sky-100 text-sky-600 rounded-full mb-3">
+                        <i data-lucide="qr-code" class="w-8 h-8"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800">สแกน QR Code เข้าสู่ระบบประเมิน</h2>
+                    <p class="text-slate-500 text-sm mt-1">ใช้กล้องมือถือสแกนเพื่อเข้าใช้งานระบบประเมินความพึงพอใจ</p>
+                </div>
+
+                <!-- QR Display Container -->
+                <div class="bg-slate-50 border border-slate-200 p-6 rounded-2xl inline-block shadow-inner my-2">
+                    <img id="qrImage" src="" alt="Website QR Code" class="w-64 h-64 mx-auto rounded-lg shadow-sm border border-white">
+                    <p id="qrUrlText" class="text-xs font-mono text-slate-500 mt-4 break-all max-w-xs mx-auto"></p>
+                </div>
+
+                <!-- Input to change URL dynamically -->
+                <div class="mt-6 text-left max-w-md mx-auto bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">URL ของเว็บนี้ (ปรับเปลี่ยนได้):</label>
+                    <div class="flex gap-2">
+                        <input type="url" id="qrUrlInput" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-sky-500" placeholder="https://your-website.com">
+                        <button onclick="updateQRCode()" class="px-3 py-2 bg-sky-600 text-white rounded-lg text-xs font-medium hover:bg-sky-700 transition">อัปเดต</button>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-center gap-3 mt-6">
+                    <button onclick="downloadQR()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm transition">
+                        <i data-lucide="download" class="w-4 h-4"></i> ดาวน์โหลด QR Code
+                    </button>
+                    <button onclick="window.print()" class="px-5 py-2.5 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-sm font-medium flex items-center gap-2 transition">
+                        <i data-lucide="printer" class="w-4 h-4"></i> พิมพ์หน้า QR Code
+                    </button>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- App Script Core logic -->
@@ -388,6 +430,37 @@
 
         lucide.createIcons();
 
+        // Initialize QR Code with current URL
+        window.addEventListener('DOMContentLoaded', () => {
+            const currentUrl = window.location.href;
+            document.getElementById('qrUrlInput').value = currentUrl;
+            generateQR(currentUrl);
+            fetchRealtimeData();
+        });
+
+        function generateQR(url) {
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`;
+            document.getElementById('qrImage').src = qrApiUrl;
+            document.getElementById('qrUrlText').innerText = url;
+        }
+
+        function updateQRCode() {
+            const newUrl = document.getElementById('qrUrlInput').value.trim();
+            if (newUrl) {
+                generateQR(newUrl);
+            }
+        }
+
+        function downloadQR() {
+            const qrSrc = document.getElementById('qrImage').src;
+            const a = document.createElement('a');
+            a.href = qrSrc;
+            a.download = 'qrcode.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
         function switchTab(tabName) {
             document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -397,6 +470,13 @@
 
             if (targetSection) targetSection.classList.remove('hidden');
             if (targetTab) targetTab.classList.add('active');
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text).replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+            });
         }
 
         async function handleFormSubmit(e) {
@@ -517,65 +597,60 @@
 
         function updateDashboard() {
             const filterSubject = document.getElementById('filterSubject').value;
-            let filteredData = cleanedSurveyData;
+            const filteredData = filterSubject === 'ALL' 
+                ? cleanedSurveyData 
+                : cleanedSurveyData.filter(d => d.subjectName === filterSubject);
 
-            if (filterSubject !== 'ALL') {
-                filteredData = cleanedSurveyData.filter(d => d.subjectName === filterSubject);
-            }
+            const total = filteredData.length;
+            document.getElementById('statTotal').innerText = total;
 
-            if (filteredData.length === 0) {
-                document.getElementById('statTotal').innerText = "0";
+            if (total === 0) {
                 document.getElementById('statMean').innerText = "0.00";
                 document.getElementById('statSD').innerText = "0.00";
                 document.getElementById('statMeanInterpretation').innerText = "-";
                 document.getElementById('statTopSubject').innerText = "-";
-                renderCharts({}, [0, 0, 0, 0, 0]);
+                renderCharts([], []);
                 return;
             }
 
-            document.getElementById('statTotal').innerText = filteredData.length;
-
-            const overallScores = filteredData.map(d => d.meanScore);
-            const meanSum = overallScores.reduce((a, b) => a + b, 0);
-            const overallMean = meanSum / filteredData.length;
+            let allMeans = filteredData.map(d => d.meanScore);
+            let overallMean = allMeans.reduce((a, b) => a + b, 0) / total;
             document.getElementById('statMean').innerText = overallMean.toFixed(2);
-            document.getElementById('statMeanInterpretation').innerText = getLikertLabel(overallMean);
+            document.getElementById('statMeanInterpretation').innerText = getInterpretation(overallMean);
 
-            const variance = overallScores.reduce((acc, score) => acc + Math.pow(score - overallMean, 2), 0) / filteredData.length;
-            const sd = Math.sqrt(variance);
-            document.getElementById('statSD').innerText = sd.toFixed(2);
+            // S.D. Calculation
+            let variance = allMeans.reduce((a, b) => a + Math.pow(b - overallMean, 2), 0) / (total > 1 ? total - 1 : 1);
+            document.getElementById('statSD').innerText = Math.sqrt(variance).toFixed(2);
 
-            const subjectGroup = {};
+            // Calculate per subject mean
+            let subjectGroups = {};
             cleanedSurveyData.forEach(d => {
-                if (!subjectGroup[d.subjectName]) subjectGroup[d.subjectName] = [];
-                subjectGroup[d.subjectName].push(d.meanScore);
+                if (!subjectGroups[d.subjectName]) subjectGroups[d.subjectName] = [];
+                subjectGroups[d.subjectName].push(d.meanScore);
             });
 
-            const subjectMeans = {};
             let topSub = "-";
-            let topScore = 0;
-
-            Object.keys(subjectGroup).forEach(sub => {
-                const avg = subjectGroup[sub].reduce((a, b) => a + b, 0) / subjectGroup[sub].length;
-                subjectMeans[sub] = parseFloat(avg.toFixed(2));
+            let topScore = -1;
+            Object.keys(subjectGroups).forEach(sub => {
+                let avg = subjectGroups[sub].reduce((a, b) => a + b, 0) / subjectGroups[sub].length;
                 if (avg > topScore) {
                     topScore = avg;
                     topSub = sub;
                 }
             });
-
             document.getElementById('statTopSubject').innerText = topSub;
 
-            const aspectAvg = [1, 2, 3, 4, 5].map(qNum => {
-                const key = `q${qNum}`;
-                const qSum = filteredData.reduce((acc, d) => acc + d[key], 0);
-                return parseFloat((qSum / filteredData.length).toFixed(2));
+            // Aspect Breakdown Mean
+            let aspectMeans = [1, 2, 3, 4, 5].map(i => {
+                let key = `q${i}`;
+                let sum = filteredData.reduce((a, b) => a + (b[key] || 0), 0);
+                return parseFloat((sum / total).toFixed(2));
             });
 
-            renderCharts(subjectMeans, aspectAvg);
+            renderCharts(subjectGroups, aspectMeans);
         }
 
-        function getLikertLabel(score) {
+        function getInterpretation(score) {
             if (score >= 4.21) return "ระดับ: มากที่สุด";
             if (score >= 3.41) return "ระดับ: มาก";
             if (score >= 2.61) return "ระดับ: ปานกลาง";
@@ -583,20 +658,24 @@
             return "ระดับ: น้อยที่สุด";
         }
 
-        function renderCharts(subjectMeans, aspectAvg) {
+        function renderCharts(subjectGroups, aspectMeans) {
             const ctx1 = document.getElementById('chartSubjectMean').getContext('2d');
+            const ctx2 = document.getElementById('chartAspectRadar').getContext('2d');
+
             if (chartInstanceMean) chartInstanceMean.destroy();
+            if (chartInstanceAspect) chartInstanceAspect.destroy();
+
+            const subLabels = Object.keys(subjectGroups);
+            const subData = subLabels.map(s => (subjectGroups[s].reduce((a,b)=>a+b,0) / subjectGroups[s].length).toFixed(2));
 
             chartInstanceMean = new Chart(ctx1, {
                 type: 'bar',
                 data: {
-                    labels: Object.keys(subjectMeans),
+                    labels: subLabels,
                     datasets: [{
                         label: 'คะแนนเฉลี่ย',
-                        data: Object.values(subjectMeans),
-                        backgroundColor: 'rgba(2, 132, 199, 0.75)',
-                        borderColor: '#0284c7',
-                        borderWidth: 1.5,
+                        data: subData,
+                        backgroundColor: '#0284c7',
                         borderRadius: 6
                     }]
                 },
@@ -607,19 +686,16 @@
                 }
             });
 
-            const ctx2 = document.getElementById('chartAspectRadar').getContext('2d');
-            if (chartInstanceAspect) chartInstanceAspect.destroy();
-
             chartInstanceAspect = new Chart(ctx2, {
                 type: 'radar',
                 data: {
-                    labels: ['ด้านเนื้อหา', 'ด้านการสอน', 'ด้านสื่ออุปกรณ์', 'ด้านบรรยากาศ', 'ด้านการประเมิน'],
+                    labels: ['ด้านเนื้อหา', 'ด้านการสอน', 'ด้านสื่ออุปกรณ์', 'ด้านบรรยากาศ', 'ด้านวัดผล'],
                     datasets: [{
-                        label: 'คะแนนเฉลี่ยรายด้าน',
-                        data: aspectAvg,
-                        backgroundColor: 'rgba(79, 70, 229, 0.2)',
-                        borderColor: '#4f46e5',
-                        pointBackgroundColor: '#4f46e5'
+                        label: 'คะแนนเฉลี่ยแต่ละด้าน',
+                        data: aspectMeans,
+                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                        borderColor: '#6366f1',
+                        pointBackgroundColor: '#6366f1'
                     }]
                 },
                 options: {
@@ -629,15 +705,6 @@
                 }
             });
         }
-
-        function escapeHtml(str) {
-            return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-        }
-
-        window.onload = function() {
-            fetchRealtimeData();
-            setInterval(fetchRealtimeData, 5000);
-        };
     </script>
 </body>
 </html>
