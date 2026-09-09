@@ -10,6 +10,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- QRCode.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
         body {
@@ -20,6 +22,10 @@
             border-bottom: 3px solid #0284c7;
             color: #0284c7;
             font-weight: 600;
+            background-color: #f0f9ff;
+        }
+        #qrcode-canvas canvas, #qrcode-canvas img {
+            margin: 0 auto;
         }
     </style>
 </head>
@@ -27,7 +33,7 @@
 
     <!-- Header Navigation -->
     <header class="bg-gradient-to-r from-sky-700 via-sky-600 to-indigo-700 text-white shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-[95%] mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <div class="flex items-center space-x-3">
                     <div class="bg-white p-2 rounded-full text-sky-700 shadow-md">
@@ -49,25 +55,25 @@
     </header>
 
     <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="max-w-[95%] mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-        <!-- Navigation Tabs -->
-        <div class="flex flex-wrap border-b border-slate-200 mb-8 bg-white rounded-t-xl px-4 pt-2 shadow-sm">
-            <button type="button" onclick="switchTab('survey')" id="tab-survey" class="tab-btn active px-6 py-3 font-medium text-slate-600 hover:text-sky-600 flex items-center gap-2 transition-all">
-                <i data-lucide="file-edit" class="w-5 h-5"></i>
-                แบบฟอร์มประเมิน
+        <!-- Navigation Tabs (ปรับปรุง Grid & Spacing) -->
+        <div class="grid grid-cols-2 md:grid-cols-4 border-b border-slate-200 mb-8 bg-white rounded-t-xl overflow-hidden shadow-sm">
+            <button type="button" onclick="switchTab('survey')" id="tab-survey" class="tab-btn active py-3.5 px-3 text-xs sm:text-sm font-medium text-slate-600 hover:text-sky-600 flex items-center justify-center gap-2 transition-all border-r border-slate-100">
+                <i data-lucide="file-edit" class="w-4 h-4 shrink-0"></i>
+                <span class="truncate">แบบฟอร์มประเมิน</span>
             </button>
-            <button type="button" onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn px-6 py-3 font-medium text-slate-600 hover:text-sky-600 flex items-center gap-2 transition-all">
-                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-                Dashboard สรุปผลสถิติ
+            <button type="button" onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn py-3.5 px-3 text-xs sm:text-sm font-medium text-slate-600 hover:text-sky-600 flex items-center justify-center gap-2 transition-all border-r border-slate-100">
+                <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i>
+                <span class="truncate">Dashboard สรุปผลสถิติ</span>
             </button>
-            <button type="button" onclick="switchTab('cleaning')" id="tab-cleaning" class="tab-btn px-6 py-3 font-medium text-slate-600 hover:text-sky-600 flex items-center gap-2 transition-all">
-                <i data-lucide="sparkles" class="w-5 h-5"></i>
-                การทำความสะอาดข้อมูล (Data Cleaning)
+            <button type="button" onclick="switchTab('cleaning')" id="tab-cleaning" class="tab-btn py-3.5 px-3 text-xs sm:text-sm font-medium text-slate-600 hover:text-sky-600 flex items-center justify-center gap-2 transition-all border-r border-slate-100">
+                <i data-lucide="sparkles" class="w-4 h-4 shrink-0"></i>
+                <span class="truncate">การทำความสะอาดข้อมูล (Data Cleaning)</span>
             </button>
-            <button type="button" onclick="switchTab('qrcode')" id="tab-qrcode" class="tab-btn px-6 py-3 font-medium text-slate-600 hover:text-sky-600 flex items-center gap-2 transition-all">
-                <i data-lucide="qr-code" class="w-5 h-5"></i>
-                QR Code เข้าเว็บไซต์
+            <button type="button" onclick="switchTab('qrcode')" id="tab-qrcode" class="tab-btn py-3.5 px-3 text-xs sm:text-sm font-medium text-slate-600 hover:text-sky-600 flex items-center justify-center gap-2 transition-all">
+                <i data-lucide="qr-code" class="w-4 h-4 shrink-0 text-amber-500"></i>
+                <span class="truncate font-semibold text-amber-600">QR Code เข้าเว็บไซต์</span>
             </button>
         </div>
 
@@ -83,7 +89,6 @@
                 </div>
 
                 <form id="evalForm" onsubmit="handleFormSubmit(event)" class="space-y-6">
-                    <!-- Student Info -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-sky-50/50 p-4 rounded-xl border border-sky-100">
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">รหัสนักเรียน / ชื่อ-สกุล <span class="text-red-500">*</span></label>
@@ -117,7 +122,6 @@
                         </div>
                     </div>
 
-                    <!-- Evaluation Scale Grid -->
                     <div class="space-y-4">
                         <h3 class="font-bold text-slate-800 text-lg">ส่วนที่ 2: เกณฑ์ประเมินความพึงพอใจ (คะแนน 1 - 5)</h3>
                         <div class="overflow-x-auto">
@@ -178,13 +182,11 @@
                         </div>
                     </div>
 
-                    <!-- Feedback Comment -->
                     <div>
                         <label class="block text-sm font-semibold text-slate-700 mb-1">ข้อเสนอแนะเพิ่มเติมเพื่อการปรับปรุง</label>
                         <textarea id="feedbackText" rows="3" placeholder="ข้อเสนอแนะเพิ่มเติม..." class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition"></textarea>
                     </div>
 
-                    <!-- Submit Button -->
                     <div class="flex justify-end gap-3">
                         <button type="reset" class="px-5 py-2.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 font-medium transition">ล้างข้อมูล</button>
                         <button type="submit" id="submitBtn" class="px-6 py-2.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-medium shadow-md flex items-center gap-2 transition">
@@ -198,7 +200,6 @@
 
         <!-- Section 2: Dashboard -->
         <section id="section-dashboard" class="space-y-6 hidden">
-            <!-- Filter & Controls Bar -->
             <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center gap-3">
                     <i data-lucide="filter" class="text-sky-600 w-5 h-5"></i>
@@ -221,7 +222,6 @@
                 </div>
             </div>
 
-            <!-- Metric KPI Cards -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
                 <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
                     <div>
@@ -268,9 +268,7 @@
                 </div>
             </div>
 
-            <!-- Visual Charts Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Chart 1: Subject Scores -->
                 <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                     <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <i data-lucide="bar-chart-3" class="text-sky-600 w-5 h-5"></i>
@@ -281,7 +279,6 @@
                     </div>
                 </div>
 
-                <!-- Chart 2: Question Aspect Breakdown -->
                 <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                     <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <i data-lucide="pie-chart" class="text-indigo-600 w-5 h-5"></i>
@@ -293,7 +290,6 @@
                 </div>
             </div>
 
-            <!-- Likert Interpretation Reference Table -->
             <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                 <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
                     <i data-lucide="book-open" class="text-slate-600 w-5 h-5"></i>
@@ -341,7 +337,6 @@
                     </button>
                 </div>
 
-                <!-- Data Pipeline Audit Summary -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl">
                         <span class="text-xs text-slate-500 block">ข้อมูลดิบจาก Sheets (Raw Data)</span>
@@ -357,7 +352,6 @@
                     </div>
                 </div>
 
-                <!-- Cleaned Data Table -->
                 <h3 class="font-bold text-slate-800 mb-3 text-sm">ตารางแสดงรายการข้อมูลที่ผ่านการทำความสะอาดแล้ว</h3>
                 <div class="overflow-x-auto border border-slate-200 rounded-xl">
                     <table class="w-full text-left text-sm">
@@ -372,44 +366,38 @@
                             </tr>
                         </thead>
                         <tbody id="cleanedTableBody" class="divide-y divide-slate-200 bg-white">
-                            <!-- JS Inject -->
                         </tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <!-- Section 4: QR Code Page (เพิ่มใหม่) -->
+        <!-- Section 4: QR Code Page -->
         <section id="section-qrcode" class="space-y-6 hidden">
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-8 text-center max-w-2xl mx-auto">
                 <div class="mb-6">
-                    <div class="inline-flex p-3 bg-sky-100 text-sky-600 rounded-full mb-3">
+                    <div class="inline-flex p-3 bg-amber-100 text-amber-600 rounded-full mb-3">
                         <i data-lucide="qr-code" class="w-8 h-8"></i>
                     </div>
                     <h2 class="text-2xl font-bold text-slate-800">สแกน QR Code เข้าสู่ระบบประเมิน</h2>
                     <p class="text-slate-500 text-sm mt-1">ใช้กล้องมือถือสแกนเพื่อเข้าใช้งานระบบประเมินความพึงพอใจ</p>
                 </div>
 
-                <!-- QR Display Container -->
+                <!-- Canvas QR Container -->
                 <div class="bg-slate-50 border border-slate-200 p-6 rounded-2xl inline-block shadow-inner my-2">
-                    <img id="qrImage" src="" alt="Website QR Code" class="w-64 h-64 mx-auto rounded-lg shadow-sm border border-white">
+                    <div id="qrcode-canvas" class="flex justify-center items-center min-h-[200px]"></div>
                     <p id="qrUrlText" class="text-xs font-mono text-slate-500 mt-4 break-all max-w-xs mx-auto"></p>
                 </div>
 
-                <!-- Input to change URL dynamically -->
                 <div class="mt-6 text-left max-w-md mx-auto bg-slate-50 p-4 rounded-xl border border-slate-200">
                     <label class="block text-xs font-semibold text-slate-600 mb-1">URL ของเว็บนี้ (ปรับเปลี่ยนได้):</label>
                     <div class="flex gap-2">
                         <input type="url" id="qrUrlInput" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-sky-500" placeholder="https://your-website.com">
-                        <button onclick="updateQRCode()" class="px-3 py-2 bg-sky-600 text-white rounded-lg text-xs font-medium hover:bg-sky-700 transition">อัปเดต</button>
+                        <button onclick="updateQRCode()" class="px-3 py-2 bg-sky-600 text-white rounded-lg text-xs font-medium hover:bg-sky-700 transition shrink-0">อัปเดต</button>
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
                 <div class="flex justify-center gap-3 mt-6">
-                    <button onclick="downloadQR()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm transition">
-                        <i data-lucide="download" class="w-4 h-4"></i> ดาวน์โหลด QR Code
-                    </button>
                     <button onclick="window.print()" class="px-5 py-2.5 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-sm font-medium flex items-center gap-2 transition">
                         <i data-lucide="printer" class="w-4 h-4"></i> พิมพ์หน้า QR Code
                     </button>
@@ -419,7 +407,6 @@
 
     </main>
 
-    <!-- App Script Core logic -->
     <script>
         const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvMdtCZfQvpaSkO3M30GfIsHJoV12fxilVm9IQZSpaKoYYH0gnvcX4sYiJq1DyFI_P/exec";
 
@@ -427,11 +414,10 @@
         let cleanedSurveyData = [];
         let chartInstanceMean = null;
         let chartInstanceAspect = null;
+        let qrObj = null;
 
-        lucide.createIcons();
-
-        // Initialize QR Code with current URL
-        window.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
             const currentUrl = window.location.href;
             document.getElementById('qrUrlInput').value = currentUrl;
             generateQR(currentUrl);
@@ -439,8 +425,16 @@
         });
 
         function generateQR(url) {
-            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`;
-            document.getElementById('qrImage').src = qrApiUrl;
+            const container = document.getElementById("qrcode-canvas");
+            container.innerHTML = ""; 
+            qrObj = new QRCode(container, {
+                text: url,
+                width: 200,
+                height: 200,
+                colorDark : "#0284c7",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
             document.getElementById('qrUrlText').innerText = url;
         }
 
@@ -449,16 +443,6 @@
             if (newUrl) {
                 generateQR(newUrl);
             }
-        }
-
-        function downloadQR() {
-            const qrSrc = document.getElementById('qrImage').src;
-            const a = document.createElement('a');
-            a.href = qrSrc;
-            a.download = 'qrcode.png';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
         }
 
         function switchTab(tabName) {
@@ -618,11 +602,9 @@
             document.getElementById('statMean').innerText = overallMean.toFixed(2);
             document.getElementById('statMeanInterpretation').innerText = getInterpretation(overallMean);
 
-            // S.D. Calculation
             let variance = allMeans.reduce((a, b) => a + Math.pow(b - overallMean, 2), 0) / (total > 1 ? total - 1 : 1);
             document.getElementById('statSD').innerText = Math.sqrt(variance).toFixed(2);
 
-            // Calculate per subject mean
             let subjectGroups = {};
             cleanedSurveyData.forEach(d => {
                 if (!subjectGroups[d.subjectName]) subjectGroups[d.subjectName] = [];
@@ -640,7 +622,6 @@
             });
             document.getElementById('statTopSubject').innerText = topSub;
 
-            // Aspect Breakdown Mean
             let aspectMeans = [1, 2, 3, 4, 5].map(i => {
                 let key = `q${i}`;
                 let sum = filteredData.reduce((a, b) => a + (b[key] || 0), 0);
