@@ -561,17 +561,18 @@
             // 3. ข้อมูลผิด/ข้อมูลขยะ (Invalid Data)
             mockData.push({ studentName: "   ", studentGrade: "ม.1", subjectName: "คณิตศาสตร์", q1: 5, q2: 5, q3: 5, q4: 5, q5: 5 }); // ไม่ใส่ชื่อ
             mockData.push({ studentName: "abc", studentGrade: "ม.2", subjectName: "ภาษาไทย", q1: 4, q2: 4, q3: 4, q4: 4, q5: 4 }); // ชื่อสั้นเกินไป
+            mockData.push({ studentName: '"วัศรีหดหสา', studentGrade: "ม.2", subjectName: "ภาษาต่างประเทศ", q1: 5, q2: 5, q3: 5, q4: 5, q5: 5 }); // มีเครื่องหมายอักขระพิเศษ (อัญประกาศ) ติดมา
             mockData.push({ studentName: "นายทดสอบ มั่วซั่ว", studentGrade: "", subjectName: "สุขศึกษาและพลศึกษา", q1: 3, q2: 3, q3: 3, q4: 3, q5: 3 }); // ไม่ใส่ระดับชั้น
             mockData.push({ studentName: "เด็กชายสมศักดิ์", studentGrade: "ม.3", subjectName: "", q1: 5, q2: 5, q3: 5, q4: 5, q5: 5 }); // ไม่เลือกรายวิชา
             mockData.push({ studentName: "test1234", studentGrade: "ม.4", subjectName: "การงานอาชีพ", q1: 0, q2: 0, q3: 0, q4: 0, q5: 0 }); // คะแนนเป็น 0
 
             rawSurveyData = mockData;
             runDataCleaning();
-            alert("สร้างข้อมูลจำลองสำเร็จ! (มีทั้งข้อมูลปกติ ข้อมูลซ้ำ และข้อมูลขยะ เพื่อทดสอบระบบ Data Cleaning)");
+            alert("สร้างข้อมูลจำลองสำเร็จ! (มีทั้งข้อมูลปกติ ข้อมูลซ้ำ ข้อมูลที่มีอักขระพิเศษ และข้อมูลขยะ เพื่อทดสอบระบบ Data Cleaning)");
         }
 
         // ==========================================
-        //  ฟังก์ชัน Data Cleaning Engine
+        //  ฟังก์ชัน Data Cleaning Engine (อัปเดตตรวจ Regex ชื่อ)
         // ==========================================
         function runDataCleaning() {
             const seenKeys = new Set();
@@ -579,6 +580,9 @@
             let tableRows = [];
 
             cleanedSurveyData = [];
+
+            // ตรวจเฉพาะตัวอักษรภาษาไทย/อังกฤษ ช่องว่าง และจุดเท่านั้น (ห้ามมีอักขระพิเศษเช่น ", ', #, @ ฯลฯ)
+            const validNamePattern = /^[a-zA-Zก-๙\s.]+$/;
 
             rawSurveyData.forEach((item, index) => {
                 const name = (item.studentName || '').toString().trim();
@@ -600,28 +604,41 @@
                 let rowBgClass = "";
                 let isValid = true;
 
-                // ตรวจจับข้อมูลขยะ/ข้อมูลผิดพลาด
+                // 1. ตรวจสอบชื่อ
                 if (!name || name.length < 4) {
                     isValid = false;
-                    statusText = "❌ ชื่อไม่สมบูรณ์/เป็นขยะ";
+                    statusText = "❌ ชื่อสั้นเกินไป/ไม่ระบุชื่อ";
                     statusBadgeClass = "bg-rose-100 text-rose-700 border border-rose-300";
                     rowBgClass = "bg-rose-50/50";
-                } else if (!grade) {
+                } else if (!validNamePattern.test(name)) {
+                    isValid = false;
+                    statusText = "❌ รูปแบบชื่อไม่ถูกต้อง (มีอักขระพิเศษ)";
+                    statusBadgeClass = "bg-rose-100 text-rose-700 border border-rose-300";
+                    rowBgClass = "bg-rose-50/50";
+                } 
+                // 2. ตรวจสอบระดับชั้น
+                else if (!grade) {
                     isValid = false;
                     statusText = "❌ ไม่ได้ระบุระดับชั้น";
                     statusBadgeClass = "bg-rose-100 text-rose-700 border border-rose-300";
                     rowBgClass = "bg-rose-50/50";
-                } else if (!subject) {
+                } 
+                // 3. ตรวจสอบรายวิชา
+                else if (!subject) {
                     isValid = false;
                     statusText = "❌ ไม่ได้เลือกรายวิชา";
                     statusBadgeClass = "bg-rose-100 text-rose-700 border border-rose-300";
                     rowBgClass = "bg-rose-50/50";
-                } else if (avg <= 0) {
+                } 
+                // 4. ตรวจสอบคะแนน
+                else if (avg <= 0) {
                     isValid = false;
                     statusText = "❌ คะแนนไม่สมบูรณ์ (เป็น 0)";
                     statusBadgeClass = "bg-rose-100 text-rose-700 border border-rose-300";
                     rowBgClass = "bg-rose-50/50";
-                } else if (seenKeys.has(uniqueKey)) {
+                } 
+                // 5. ตรวจสอบข้อมูลซ้ำ
+                else if (seenKeys.has(uniqueKey)) {
                     isValid = false;
                     statusText = "⚠️ ข้อมูลซ้ำซ้อน (Duplicate)";
                     statusBadgeClass = "bg-amber-100 text-amber-700 border border-amber-300";
