@@ -92,7 +92,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-sky-50/50 p-4 rounded-xl border border-sky-100">
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">รหัสประจำตัว / ชื่อ-สกุล <span class="text-red-500">*</span></label>
-                            <input type="text" id="studentName" required placeholder="เช่น 34567 หรือ เด็กชายสมชาย" class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition">
+                            <input type="text" id="studentName" required placeholder="เช่น 27171 หรือ 29140/ฐิติโชติ" class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">ระดับชั้น <span class="text-red-500">*</span></label>
@@ -533,46 +533,28 @@
         //  ฟังก์ชันสร้างข้อมูลจำลอง (Mock Data)
         // ==========================================
         function generateMockData() {
-            const validNames = ["นายสมชาย เข็มกลัด", "นางสาววิภาดา ใจดี", "เด็กชายปิติ รักเรียน", "นางสาวมณี สวยงาม", "นายวีระ ชัยชนะ", "นางสาวกานดา มีสุข", "ชยพล รัตนวงศ์", "ธีรภัทร มณีวงศ์", "นราวิชญ์ สุขเกษม"];
-            const grades = ["ม.1", "ม.2", "ม.3", "ม.4", "ม.5", "ม.6"];
-            const subjects = ["คณิตศาสตร์", "วิทยาศาสตร์และเทคโนโลยี", "ภาษาไทย", "ภาษาต่างประเทศ", "สังคมศึกษา ศาสนา และวัฒนธรรม", "สุขศึกษาและพลศึกษา", "ศิลปะ ดนตรี นาฏศิลป์", "การงานอาชีพ"];
+            let mockData = [
+                // ข้อมูลตัวอย่างที่ถูกต้อง (ตามโจทย์ผู้ใช้)
+                { studentName: "27171", studentGrade: "ม.5", subjectName: "ภาษาต่างประเทศ", q1: 5, q2: 4, q3: 4, q4: 5, q5: 4 },
+                { studentName: "29140/ฐิติโชติ มากู่", studentGrade: "ม.5", subjectName: "ภาษาต่างประเทศ", q1: 5, q2: 4, q3: 4, q4: 5, q5: 4 },
+                { studentName: "27163", studentGrade: "ม.5", subjectName: "ภาษาต่างประเทศ", q1: 4, q2: 4, q3: 4, q4: 4, q5: 4 },
+                { studentName: "นายสมชาย เข็มกลัด", studentGrade: "ม.4", subjectName: "คณิตศาสตร์", q1: 5, q2: 5, q3: 4, q4: 5, q5: 5 },
+                { studentName: "นางสาววิภาดา ใจดี", studentGrade: "ม.6", subjectName: "วิทยาศาสตร์และเทคโนโลยี", q1: 4, q2: 4, q3: 5, q4: 4, q5: 4 },
 
-            let mockData = [];
-
-            // 1. สร้างข้อมูลที่ถูกต้อง (Valid Data) 10 รายการ
-            for (let i = 0; i < 10; i++) {
-                mockData.push({
-                    studentName: validNames[i % validNames.length],
-                    studentGrade: grades[i % grades.length],
-                    subjectName: subjects[i % subjects.length],
-                    q1: Math.floor(Math.random() * 3) + 3,
-                    q2: Math.floor(Math.random() * 3) + 3,
-                    q3: Math.floor(Math.random() * 3) + 3,
-                    q4: Math.floor(Math.random() * 3) + 3,
-                    q5: Math.floor(Math.random() * 3) + 3,
-                    feedback: "เรียนสนุกมากครับ"
-                });
-            }
-
-            // 2. ข้อมูลซ้ำซ้อน (Duplicate Data)
-            mockData.push({ ...mockData[0] }); 
-            mockData.push({ ...mockData[2] }); 
-
-            // 3. ข้อมูลผิด/ข้อมูลขยะ (Invalid Data)
-            mockData.push({ studentName: "   ", studentGrade: "ม.1", subjectName: "คณิตศาสตร์", q1: 5, q2: 5, q3: 5, q4: 5, q5: 5 }); // ไม่ใส่ชื่อ
-            mockData.push({ studentName: "abc", studentGrade: "ม.2", subjectName: "ภาษาไทย", q1: 4, q2: 4, q3: 4, q4: 4, q5: 4 }); // ชื่อสั้นเกินไป
-            mockData.push({ studentName: '"วัศรีหดหสา', studentGrade: "ม.2", subjectName: "ภาษาต่างประเทศ", q1: 5, q2: 5, q3: 5, q4: 5, q5: 5 }); // มีเครื่องหมายอักขระพิเศษ (อัญประกาศ) ติดมา
-            mockData.push({ studentName: "นายทดสอบ มั่วซั่ว", studentGrade: "", subjectName: "สุขศึกษาและพลศึกษา", q1: 3, q2: 3, q3: 3, q4: 3, q5: 3 }); // ไม่ใส่ระดับชั้น
-            mockData.push({ studentName: "เด็กชายสมศักดิ์", studentGrade: "ม.3", subjectName: "", q1: 5, q2: 5, q3: 5, q4: 5, q5: 5 }); // ไม่เลือกรายวิชา
-            mockData.push({ studentName: "test1234", studentGrade: "ม.4", subjectName: "การงานอาชีพ", q1: 0, q2: 0, q3: 0, q4: 0, q5: 0 }); // คะแนนเป็น 0
+                // ข้อมูลผิดเงื่อนไข/ข้อมูลขยะ (เพื่อทดสอบ Cleaning Engine)
+                { studentName: "2918657", studentGrade: "ม.5", subjectName: "ภาษาต่างประเทศ", q1: 5, q2: 5, q3: 5, q4: 5, q5: 5 }, // เลขเกิน 6 หลัก (ผิด)
+                { studentName: '"วัศรีหดหสา', studentGrade: "ม.2", subjectName: "ภาษาต่างประเทศ", q1: 5, q2: 5, q3: 5, q4: 5, q5: 5 }, // มีเครื่องหมายอัญประกาศ (ผิด)
+                { studentName: "   ", studentGrade: "ม.1", subjectName: "คณิตศาสตร์", q1: 5, q2: 5, q3: 5, q4: 5, q5: 5 }, // ไม่ใส่ชื่อ (ผิด)
+                { studentName: "27171", studentGrade: "ม.5", subjectName: "ภาษาต่างประเทศ", q1: 5, q2: 4, q3: 4, q4: 5, q5: 4 } // ข้อมูลซ้ำ (Duplicate)
+            ];
 
             rawSurveyData = mockData;
             runDataCleaning();
-            alert("สร้างข้อมูลจำลองสำเร็จ! (มีทั้งข้อมูลปกติ ข้อมูลซ้ำ ข้อมูลที่มีอักขระพิเศษ และข้อมูลขยะ เพื่อทดสอบระบบ Data Cleaning)");
+            alert("สร้างข้อมูลจำลองสำเร็จ! (ทดสอบระบบ Cleaning แบบรองรับรหัสประจำตัวและสัญลักษณ์ /)");
         }
 
         // ==========================================
-        //  ฟังก์ชัน Data Cleaning Engine (อัปเดตตรวจ Regex ชื่อ)
+        //  ฟังก์ชัน Data Cleaning Engine (อัปเดตล่าสุด)
         // ==========================================
         function runDataCleaning() {
             const seenKeys = new Set();
@@ -581,8 +563,8 @@
 
             cleanedSurveyData = [];
 
-            // ตรวจเฉพาะตัวอักษรภาษาไทย/อังกฤษ ช่องว่าง และจุดเท่านั้น (ห้ามมีอักขระพิเศษเช่น ", ', #, @ ฯลฯ)
-            const validNamePattern = /^[a-zA-Zก-๙\s.]+$/;
+            // ตรวจเฉพาะตัวอักษรไทย/อังกฤษ ตัวเลข ช่องว่าง จุด และเครื่องหมาย / เท่านั้น (ห้ามมี ", ', #, @, $ ฯลฯ)
+            const validFormatPattern = /^[a-zA-Zก-๙0-9\s.\/]+$/;
 
             rawSurveyData.forEach((item, index) => {
                 const name = (item.studentName || '').toString().trim();
@@ -604,13 +586,24 @@
                 let rowBgClass = "";
                 let isValid = true;
 
-                // 1. ตรวจสอบชื่อ
-                if (!name || name.length < 4) {
+                const isOnlyDigits = /^\d+$/.test(name);
+
+                // 1. ตรวจสอบชื่อ/รหัสประจำตัว
+                if (!name || name.length < 3) {
                     isValid = false;
                     statusText = "❌ ชื่อสั้นเกินไป/ไม่ระบุชื่อ";
                     statusBadgeClass = "bg-rose-100 text-rose-700 border border-rose-300";
                     rowBgClass = "bg-rose-50/50";
-                } else if (!validNamePattern.test(name)) {
+                } 
+                // กรณีเป็นตัวเลขล้วน ถ้าความยาวเกิน 6 หลักถือว่าผิด
+                else if (isOnlyDigits && name.length > 6) {
+                    isValid = false;
+                    statusText = "❌ รหัสประจำตัวเกิน 6 หลัก";
+                    statusBadgeClass = "bg-rose-100 text-rose-700 border border-rose-300";
+                    rowBgClass = "bg-rose-50/50";
+                }
+                // ตรวจอักขระพิเศษแปลกปลอม
+                else if (!validFormatPattern.test(name)) {
                     isValid = false;
                     statusText = "❌ รูปแบบชื่อไม่ถูกต้อง (มีอักขระพิเศษ)";
                     statusBadgeClass = "bg-rose-100 text-rose-700 border border-rose-300";
