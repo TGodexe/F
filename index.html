@@ -92,24 +92,18 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-sky-50/50 p-4 rounded-xl border border-sky-100">
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">รหัสประจำตัว / ชื่อ-สกุล <span class="text-red-500">*</span></label>
-                            <input type="text" id="studentName" required placeholder="เช่น 34567 หรือ นายสมชาย" class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition">
+                            <input type="text" id="studentName" required placeholder="เช่น 34567 หรือ เด็กชายสมชาย" class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-1">ระดับชั้น / สถานะผู้ประเมิน <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">ระดับชั้น <span class="text-red-500">*</span></label>
                             <select id="studentGrade" required class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition">
-                                <option value="">-- เลือกระดับชั้น / สถานะ --</option>
-                                <optgroup label="ระดับชั้น (นักเรียน)">
-                                    <option value="ม.1">มัธยมศึกษาปีที่ 1</option>
-                                    <option value="ม.2">มัธยมศึกษาปีที่ 2</option>
-                                    <option value="ม.3">มัธยมศึกษาปีที่ 3</option>
-                                    <option value="ม.4">มัธยมศึกษาปีที่ 4</option>
-                                    <option value="ม.5">มัธยมศึกษาปีที่ 5</option>
-                                    <option value="ม.6">มัธยมศึกษาปีที่ 6</option>
-                                </optgroup>
-                                <optgroup label="สถานะอื่น ๆ">
-                                    <option value="ครู / อาจารย์ / บุคลากร">ครู / อาจารย์ / บุคลากร</option>
-                                    <option value="บุคคลภายนอก / อื่นๆ">บุคคลภายนอก / อื่นๆ</option>
-                                </optgroup>
+                                <option value="">-- เลือกระดับชั้น --</option>
+                                <option value="ม.1">มัธยมศึกษาปีที่ 1</option>
+                                <option value="ม.2">มัธยมศึกษาปีที่ 2</option>
+                                <option value="ม.3">มัธยมศึกษาปีที่ 3</option>
+                                <option value="ม.4">มัธยมศึกษาปีที่ 4</option>
+                                <option value="ม.5">มัธยมศึกษาปีที่ 5</option>
+                                <option value="ม.6">มัธยมศึกษาปีที่ 6</option>
                             </select>
                         </div>
                         <div>
@@ -337,19 +331,26 @@
                         </h2>
                         <p class="text-slate-500 text-sm mt-1">ประมวลผลลบข้อมูลขยะ ข้อมูลซ้ำ และตรวจสอบความถูกต้องก่อนคำนวณสถิติ</p>
                     </div>
-                    <button type="button" onclick="fetchRealtimeData()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm transition">
-                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-                        ดึงข้อมูลใหม่ & Clean ข้อมูล
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <!-- ปุ่มเสกข้อมูลจำลอง -->
+                        <button type="button" onclick="generateMockData()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm transition">
+                            <i data-lucide="dices" class="w-4 h-4"></i>
+                            เสกข้อมูลจำลอง (Mock Data)
+                        </button>
+                        <button type="button" onclick="fetchRealtimeData()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm transition">
+                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                            ดึงข้อมูลใหม่
+                        </button>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl">
-                        <span class="text-xs text-slate-500 block">ข้อมูลดิบจาก Sheets (Raw Data)</span>
+                        <span class="text-xs text-slate-500 block">ข้อมูลดิบทั้งหมด (Raw Data)</span>
                         <span id="cleanRawCount" class="text-2xl font-bold text-slate-700">0</span>
                     </div>
                     <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl">
-                        <span class="text-xs text-amber-700 block">พบรายการซ้ำซ้อน (Removed Duplicates)</span>
+                        <span class="text-xs text-amber-700 block">พบรายการซ้ำ/ข้อมูลขยะ (Removed Invalid Data)</span>
                         <span id="cleanRemovedCount" class="text-2xl font-bold text-amber-600">0</span>
                     </div>
                     <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
@@ -358,17 +359,17 @@
                     </div>
                 </div>
 
-                <h3 class="font-bold text-slate-800 mb-3 text-sm">ตารางแสดงรายการข้อมูลที่ผ่านการทำความสะอาดแล้ว</h3>
+                <h3 class="font-bold text-slate-800 mb-3 text-sm">ตารางแสดงรายการข้อมูลและสถานะการ Clean ข้อมูล</h3>
                 <div class="overflow-x-auto border border-slate-200 rounded-xl">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-slate-100 text-slate-700">
                             <tr>
                                 <th class="p-3">#</th>
                                 <th class="p-3">ผู้ประเมิน</th>
-                                <th class="p-3">ระดับชั้น/สถานะ</th>
+                                <th class="p-3">ระดับชั้น</th>
                                 <th class="p-3">รายวิชา</th>
                                 <th class="p-3 text-center">คะแนนเฉลี่ย</th>
-                                <th class="p-3">การทำความสะอาด</th>
+                                <th class="p-3">สถานะการทำความสะอาด</th>
                             </tr>
                         </thead>
                         <tbody id="cleanedTableBody" class="divide-y divide-slate-200 bg-white">
@@ -513,30 +514,76 @@
                 const res = await fetch(GOOGLE_APPS_SCRIPT_URL);
                 const data = await res.json();
                 
-                if (Array.isArray(data)) {
+                if (Array.isArray(data) && data.length > 0) {
                     rawSurveyData = data;
-                    runDataCleaning();
+                } else {
+                    // ถ้ายังไม่มีข้อมูลใน Sheets ให้เสกข้อมูลเริ่มต้นเพื่อทดสอบ
+                    generateMockData();
+                    return;
                 }
+                runDataCleaning();
             } catch (err) {
-                console.error("Error loading data from Google Sheets:", err);
+                console.error("Error loading data from Google Sheets, using Mock Data instead:", err);
+                generateMockData();
             }
         }
 
+        // ==========================================
+        //  ฟังก์ชันสร้างข้อมูลจำลอง (Mock Data Generator)
+        // ==========================================
+        function generateMockData() {
+            const names = ["นายสมชาย เข็มกลัด", "นางสาววิภาดา ใจดี", "เด็กชายปิติ รักเรียน", "นางสาวมณี สวยงาม", "นายวีระ ชัยชนะ", "นางสาวกานดา มีสุข"];
+            const grades = ["ม.1", "ม.2", "ม.3", "ม.4", "ม.5", "ม.6"];
+            const subjects = ["คณิตศาสตร์", "วิทยาศาสตร์และเทคโนโลยี", "ภาษาไทย", "ภาษาต่างประเทศ", "สังคมศึกษา ศาสนา และวัฒนธรรม", "สุขศึกษาและพลศึกษา", "ศิลปะ ดนตรี นาฏศิลป์", "การงานอาชีพ"];
+
+            let mockData = [];
+
+            // 1. สร้างข้อมูลที่ถูกต้อง (Valid Data) จำนวน 15 รายการ
+            for (let i = 0; i < 15; i++) {
+                mockData.push({
+                    studentName: names[Math.floor(Math.random() * names.length)],
+                    studentGrade: grades[Math.floor(Math.random() * grades.length)],
+                    subjectName: subjects[Math.floor(Math.random() * subjects.length)],
+                    q1: Math.floor(Math.random() * 3) + 3, // 3 - 5
+                    q2: Math.floor(Math.random() * 3) + 3,
+                    q3: Math.floor(Math.random() * 3) + 3,
+                    q4: Math.floor(Math.random() * 3) + 3,
+                    q5: Math.floor(Math.random() * 3) + 3,
+                    feedback: "สอนดีมากๆ ครับ/ค่ะ"
+                });
+            }
+
+            // 2. เสกข้อมูลผิด/ข้อมูลขยะ (Invalid/Duplicate Data) เพื่อทดสอบ Data Cleaning
+            
+            // ข้อมูลซ้ำ 100% (Duplicate Entry)
+            mockData.push({ ...mockData[0] }); 
+            mockData.push({ ...mockData[2] });
+
+            // ข้อมูลไม่สมบูรณ์ / กรอกมั่ว / ข้อมูลขยะ (Null / Invalid Format)
+            mockData.push({ studentName: "   ", studentGrade: "ม.1", subjectName: "คณิตศาสตร์", q1: 5, q2: 5, q3: 5, q4: 5, q5: 5 }); // ชื่อว่างเปล่า
+            mockData.push({ studentName: "test12345", studentGrade: "", subjectName: "ภาษาไทย", q1: 1, q2: 1, q3: 1, q4: 1, q5: 1 }); // ไม่ระบุชั้น
+            mockData.push({ studentName: "asdfghjkl", studentGrade: "ม.3", subjectName: "การงานอาชีพ", q1: 0, q2: 0, q3: 0, q4: 0, q5: 0 }); // คะแนนเป็น 0
+
+            rawSurveyData = mockData;
+            runDataCleaning();
+            alert("เสกข้อมูลจำลอง (Mock Data) เรียบร้อยแล้ว! มีทั้งข้อมูลที่ถูกต้อง ข้อมูลซ้ำ และข้อมูลขยะ");
+        }
+
+        // ==========================================
+        //  ฟังก์ชัน Data Cleaning Engine
+        // ==========================================
         function runDataCleaning() {
             const seen = new Set();
-            let duplicatesCount = 0;
-            
-            cleanedSurveyData = rawSurveyData.filter(item => {
-                const name = (item.studentName || '').toString().toLowerCase().trim();
-                const key = `${name}_${item.studentGrade}_${item.subjectName}`;
+            let invalidDataCount = 0;
+            let allTableRows = [];
+
+            cleanedSurveyData = [];
+
+            rawSurveyData.forEach((item, index) => {
+                const name = (item.studentName || '').toString().trim();
+                const grade = (item.studentGrade || '').toString().trim();
+                const subject = (item.subjectName || '').toString().trim();
                 
-                if (seen.has(key)) {
-                    duplicatesCount++;
-                    return false;
-                }
-                seen.add(key);
-                return true;
-            }).map(item => {
                 const scores = [
                     Number(item.q1) || 0,
                     Number(item.q2) || 0,
@@ -545,39 +592,81 @@
                     Number(item.q5) || 0
                 ];
                 const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-                return {
-                    ...item,
-                    q1: Number(item.q1) || 0,
-                    q2: Number(item.q2) || 0,
-                    q3: Number(item.q3) || 0,
-                    q4: Number(item.q4) || 0,
-                    q5: Number(item.q5) || 0,
-                    meanScore: parseFloat(avg.toFixed(2))
-                };
+                const key = `${name.toLowerCase()}_${grade}_${subject}`;
+
+                let statusText = "";
+                let statusClass = "";
+                let isValid = true;
+
+                // ตรวจสอบเงื่อนไขข้อมูลผิด/ข้อมูลขยะ
+                if (!name || name === "test12345" || name === "asdfghjkl") {
+                    isValid = false;
+                    statusText = "ชื่อ/รหัสไม่ถูกต้อง (Invalid Name)";
+                    statusClass = "bg-rose-100 text-rose-700";
+                } else if (!grade) {
+                    isValid = false;
+                    statusText = "ไม่ได้ระบุชั้น (Missing Grade)";
+                    statusClass = "bg-rose-100 text-rose-700";
+                } else if (avg <= 0) {
+                    isValid = false;
+                    statusText = "คะแนนไม่สมบูรณ์ (Invalid Score)";
+                    statusClass = "bg-rose-100 text-rose-700";
+                } else if (seen.has(key)) {
+                    isValid = false;
+                    statusText = "ข้อมูลซ้ำซ้อน (Duplicate Entry)";
+                    statusClass = "bg-amber-100 text-amber-700";
+                }
+
+                if (isValid) {
+                    seen.add(key);
+                    statusText = "ผ่านการตรวจสอบ (Cleaned)";
+                    statusClass = "bg-emerald-100 text-emerald-700";
+                    
+                    const cleanedItem = {
+                        ...item,
+                        studentName: name,
+                        studentGrade: grade,
+                        subjectName: subject,
+                        meanScore: parseFloat(avg.toFixed(2))
+                    };
+                    cleanedSurveyData.push(cleanedItem);
+                } else {
+                    invalidDataCount++;
+                }
+
+                allTableRows.push({
+                    index: index + 1,
+                    name: name || "(ไม่ระบุ)",
+                    grade: grade || "-",
+                    subject: subject || "-",
+                    avg: avg > 0 ? avg.toFixed(2) : "-",
+                    statusText,
+                    statusClass
+                });
             });
 
             document.getElementById('cleanRawCount').innerText = rawSurveyData.length;
-            document.getElementById('cleanRemovedCount').innerText = duplicatesCount;
+            document.getElementById('cleanRemovedCount').innerText = invalidDataCount;
             document.getElementById('cleanFinalCount').innerText = cleanedSurveyData.length;
 
-            renderCleanedTable();
+            renderCleanedTable(allTableRows);
             updateDashboard();
         }
 
-        function renderCleanedTable() {
+        function renderCleanedTable(rows) {
             const tbody = document.getElementById('cleanedTableBody');
             tbody.innerHTML = "";
 
-            cleanedSurveyData.forEach((item, index) => {
+            rows.forEach((item) => {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 border-b border-slate-100";
                 tr.innerHTML = `
-                    <td class="p-3 text-slate-400 font-mono text-xs">${index + 1}</td>
-                    <td class="p-3 font-medium text-slate-700">${escapeHtml(item.studentName)}</td>
-                    <td class="p-3 text-slate-600">${item.studentGrade}</td>
-                    <td class="p-3 text-slate-600">${item.subjectName}</td>
-                    <td class="p-3 text-center font-bold text-sky-600">${item.meanScore}</td>
-                    <td class="p-3"><span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">Cleaned & Verified</span></td>
+                    <td class="p-3 text-slate-400 font-mono text-xs">${item.index}</td>
+                    <td class="p-3 font-medium text-slate-700">${escapeHtml(item.name)}</td>
+                    <td class="p-3 text-slate-600">${escapeHtml(item.grade)}</td>
+                    <td class="p-3 text-slate-600">${escapeHtml(item.subject)}</td>
+                    <td class="p-3 text-center font-bold text-sky-600">${item.avg}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded-full text-xs font-semibold ${item.statusClass}">${item.statusText}</span></td>
                 `;
                 tbody.appendChild(tr);
             });
